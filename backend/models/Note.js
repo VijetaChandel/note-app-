@@ -24,6 +24,11 @@ const noteSchema = new mongoose.Schema({
         enum: ['Low', 'Medium', 'High'],
         default: 'Low'
     },
+    status: {
+        type: String,
+        enum: ['Ideas', 'In Progress', 'Review', 'Completed'],
+        default: 'Ideas'
+    },
     backgroundColor: {
         type: String,
         default: '#ffffff'

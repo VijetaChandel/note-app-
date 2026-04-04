@@ -21,6 +21,8 @@ mongoose.connect(process.env.MONGODB_URI)
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/notes', require('./routes/notes'));
+const aiRouter = require('./routes/ai');
+app.use('/api/ai', aiRouter);
 
 // Health check route
 app.get('/', (req, res) => {

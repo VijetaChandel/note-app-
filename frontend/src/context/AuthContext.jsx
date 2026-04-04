@@ -63,6 +63,22 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const updateProfile = async (name, email, currentPassword, newPassword, profilePicture, dateOfBirth) => {
+        try {
+            const response = await api.patch('/auth/update', { name, email, currentPassword, newPassword, profilePicture, dateOfBirth });
+            if (response.data.success) {
+                const updatedUser = response.data.user;
+                setUser(updatedUser);
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                toast.success('Profile globally synced!');
+                return true;
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Sync failed');
+            return false;
+        }
+    };
+
     const logout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -76,6 +92,7 @@ export const AuthProvider = ({ children }) => {
         register,
         login,
         logout,
+        updateProfile,
         isAuthenticated: !!user
     };
 

@@ -7,21 +7,29 @@ import 'react-toastify/dist/ReactToastify.css';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Templates from './pages/Templates';
 import Archive from './pages/Archive';
+import Pinned from './pages/Pinned';
+import Settings from './pages/Settings';
+import AccountSettings from './pages/AccountSettings';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Trash from './pages/Trash';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('darkMode');
-    return saved ? JSON.parse(saved) : false;
+    const saved = localStorage.getItem('theme');
+    return saved === 'dark';
   });
 
   useEffect(() => {
-    localStorage.setItem('darkMode', JSON.stringify(darkMode));
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
     if (darkMode) {
-      document.body.classList.add('dark-mode');
+      document.body.classList.add('dark-theme');
+      document.body.classList.remove('dark-mode'); // Compatibility cleanup
     } else {
+      document.body.classList.remove('dark-theme');
       document.body.classList.remove('dark-mode');
     }
   }, [darkMode]);
@@ -37,11 +45,21 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
                   <Dashboard darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/templates"
+              element={
+                <ProtectedRoute>
+                  <Templates darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
                 </ProtectedRoute>
               }
             />
@@ -54,6 +72,30 @@ function App() {
               }
             />
             <Route
+              path="/pinned"
+              element={
+                <ProtectedRoute>
+                  <Pinned darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/account-settings"
+              element={
+                <ProtectedRoute>
+                  <AccountSettings darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/trash"
               element={
                 <ProtectedRoute>
@@ -61,7 +103,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/" element={<Navigate to="/dashboard" />} />
+            <Route path="/" element={<Navigate to={localStorage.getItem('defaultView') || '/dashboard'} />} />
           </Routes>
 
           <ToastContainer

@@ -5,8 +5,9 @@ import { useWorkspaceStats } from '../hooks/useWorkspaceStats';
 import api from '../utils/api';
 import { toast } from 'react-toastify';
 import NoteCard from '../components/NoteCard';
+import NoteModal from '../components/NoteModal';
 
-const Archive = () => {
+const Pinned = () => {
     const { logout, user } = useAuth();
     const navigate = useNavigate();
     const { archive, pinned } = useWorkspaceStats();
@@ -14,17 +15,21 @@ const Archive = () => {
     const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentNote, setCurrentNote] = useState(null);
 
-    const fetchArchivedNotes = useCallback(async () => {
+    const fetchPinnedNotes = useCallback(async () => {
         try {
-            const params = { archived: 'true' };
+            const params = {};
             if (searchTerm) params.search = searchTerm;
             const response = await api.get('/notes', { params });
             if (response.data.success) {
-                setNotes(response.data.notes);
+                // Filter only pinned notes frontend since there is no backed query exclusively for pinned yet
+                const pinnedOnly = response.data.notes.filter(n => n.isPinned === true);
+                setNotes(pinnedOnly);
             }
         } catch (error) {
-            toast.error('Failed to fetch archived notes');
+            toast.error('Failed to fetch pinned notes');
         } finally {
             setLoading(false);
         }
@@ -32,20 +37,32 @@ const Archive = () => {
 
     useEffect(() => {
         const debounce = setTimeout(() => {
-            fetchArchivedNotes();
+            fetchPinnedNotes();
         }, 300);
         return () => clearTimeout(debounce);
-    }, [fetchArchivedNotes]);
+    }, [fetchPinnedNotes]);
 
-    const handleUnarchive = async (noteId) => {
+    const handleUnpin = async (noteId) => {
+        try {
+            const response = await api.put(`/notes/${noteId}/pin`);
+            if (response.data.success) {
+                toast.success('Note unpinned');
+                fetchPinnedNotes();
+            }
+        } catch (error) {
+            toast.error('Failed to unpin note');
+        }
+    };
+
+    const handleArchive = async (noteId) => {
         try {
             const response = await api.put(`/notes/${noteId}/archive`);
             if (response.data.success) {
-                toast.success('Note unarchived successfully');
-                fetchArchivedNotes();
+                toast.success('Note archived');
+                fetchPinnedNotes();
             }
         } catch (error) {
-            toast.error('Failed to unarchive note');
+            toast.error('Failed to archive note');
         }
     };
 
@@ -55,7 +72,7 @@ const Archive = () => {
                 const response = await api.delete(`/notes/${noteId}`);
                 if (response.data.success) {
                     toast.success('Note moved to trash');
-                    fetchArchivedNotes();
+                    fetchPinnedNotes();
                 }
             } catch (error) {
                 toast.error('Failed to delete note');
@@ -63,14 +80,28 @@ const Archive = () => {
         }
     };
     
-    // We mock Update just in case a user clicks Edit on an archived note (though mostly they shouldn't edit archived notes directly)
-    const handleUpdate = () => {
-        toast.info("Unarchive the note first to edit it.");
+    const handleUpdateClick = (note, noteId, isStatusMove = false) => {
+        if (isStatusMove) {
+            // Implicit status update (e.g. arrows)
+            handleSaveNote(note, noteId, true);
+        } else {
+            setCurrentNote(note);
+            setIsModalOpen(true);
+        }
     };
 
-    // We keep handlePin as a mock since you usually shouldn't pin an archived note
-    const handlePin = () => {
-        toast.info("Unarchive the note first to pin it.");
+    const handleSaveNote = async (noteData, noteId, silent = false) => {
+        try {
+            if (noteId) {
+                const response = await api.put(`/notes/${noteId}`, noteData);
+                if (response.data.success) {
+                    if (!silent) toast.success('Note updated');
+                    fetchPinnedNotes();
+                }
+            }
+        } catch (error) {
+            toast.error('Operation failed');
+        }
     };
 
     const handleLogout = () => {
@@ -160,6 +191,8 @@ const Archive = () => {
                     transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; display: flex; flex-direction: column;
                 }
                 .kanban-card:hover { transform: translateY(-4px) rotate(-1deg); box-shadow: 6px 6px 0px #1e3a5f; }
+                .kanban-card.completed-card { opacity: 0.72; }
+                .kanban-card.completed-card .card-title { text-decoration: line-through; color: #78716c; }
                 .card-tape {
                     position: absolute; top: -10px; left: 50%; transform: translateX(-50%) rotate(-2deg);
                     width: 70px; height: 20px; background: rgba(253, 224, 71, 0.6); box-shadow: 0 1px 2px rgba(0,0,0,0.05); z-index: 2;
@@ -180,10 +213,8 @@ const Archive = () => {
                 .card-date { font-family: 'Inter', sans-serif; font-size: 0.75rem; color: #a8a29e; }
             `}</style>
 
-            {/* Sidebar */}
             <div className="nkp-sidebar">
                 <div className="nkp-brand">NoteKeeper</div>
-                
                 <div className="nav-menu">
                     <div className="nav-item" onClick={() => navigate('/dashboard')}>
                         <span className="icon">📋</span> Board
@@ -191,11 +222,11 @@ const Archive = () => {
                     <div className="nav-item" onClick={() => navigate('/templates')}>
                         <span className="icon">📝</span> Templates
                     </div>
-                    <div className="nav-item active" onClick={() => navigate('/archive')}>
+                    <div className="nav-item" onClick={() => navigate('/archive')}>
                         <span className="icon">🗄️</span> Archive
                         {archive > 0 && <span style={{ background: 'rgba(217, 119, 6, 0.2)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', marginLeft: 'auto', color: '#d97706', fontFamily: 'Inter' }}>{archive}</span>}
                     </div>
-                    <div className="nav-item" onClick={() => navigate('/pinned')}>
+                    <div className="nav-item active" onClick={() => navigate('/pinned')}>
                         <span className="icon">📌</span> Pinned
                         {pinned > 0 && <span style={{ background: 'rgba(217, 119, 6, 0.2)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', marginLeft: 'auto', color: '#d97706', fontFamily: 'Inter' }}>{pinned}</span>}
                     </div>
@@ -211,40 +242,39 @@ const Archive = () => {
                 </div>
 
                 <div className="stats-box">
-                    <h4 className="stats-title">Archive Area</h4>
-                    <p className="stats-desc">Hidden from boards</p>
+                    <h4 className="stats-title">Favorites</h4>
+                    <p className="stats-desc">Important scattered thoughts</p>
                 </div>
             </div>
 
-            {/* Main Content */}
             <div className="nkp-main">
                 <div className="nkp-topnav">
                     <div className="top-tabs">
                         <div className="top-tab" onClick={() => navigate('/dashboard')}>Board</div>
-                        <div className="top-tab active">Archived Notes</div>
+                        <div className="top-tab active">Pinned Notes</div>
                     </div>
                     <div className="top-actions">
-                        <input type="text" className="search-bar-expand" placeholder="Search archive..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                        <input type="text" className="search-bar-expand" placeholder="Search pinned..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                         <div className="profile-dropdown" title={user?.name}>👤</div>
                     </div>
                 </div>
 
                 <div className="notes-grid-container">
                     {loading ? (
-                        <div style={{ padding: '40px', fontFamily: 'Caveat', fontSize: '2rem' }}>Dusting off old notes...</div>
+                        <div style={{ padding: '40px', fontFamily: 'Caveat', fontSize: '2rem' }}>Gathering important notes...</div>
                     ) : (
                         <div className="notes-grid">
                             {notes.length === 0 ? (
-                                <div className="empty-state">No archived thoughts yet...</div>
+                                <div className="empty-state">No pinned thoughts yet...</div>
                             ) : (
                                 notes.map(note => (
                                     <NoteCard
                                         key={note._id}
                                         note={note}
-                                        onUpdate={handleUpdate}
+                                        onUpdate={handleUpdateClick}
                                         onDelete={handleDelete}
-                                        onArchive={handleUnarchive}
-                                        onPin={handlePin}
+                                        onArchive={handleArchive}
+                                        onPin={handleUnpin}
                                     />
                                 ))
                             )}
@@ -252,8 +282,15 @@ const Archive = () => {
                     )}
                 </div>
             </div>
+
+            <NoteModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSave={handleSaveNote}
+                note={currentNote}
+            />
         </div>
     );
 };
 
-export default Archive;
+export default Pinned;

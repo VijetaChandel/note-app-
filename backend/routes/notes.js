@@ -14,7 +14,7 @@ router.post('/', async (req, res) => {
     console.log('req.userId:', req.userId);
     console.log('req.body:', req.body);
     try {
-        const { title, content, tags, priority, backgroundColor } = req.body;
+        const { title, content, tags, priority, backgroundColor, status } = req.body;
 
         if (!title || !content) {
             return res.status(400).json({
@@ -29,7 +29,8 @@ router.post('/', async (req, res) => {
             content,
             tags: tags || [],
             priority: priority || 'Low',
-            backgroundColor: backgroundColor || '#ffffff'
+            backgroundColor: backgroundColor || '#ffffff',
+            status: status || 'Ideas'
         });
 
         await note.save();
@@ -138,7 +139,7 @@ router.get('/:id', async (req, res) => {
 // @access  Private
 router.put('/:id', async (req, res) => {
     try {
-        const { title, content, tags, priority, backgroundColor } = req.body;
+        const { title, content, tags, priority, backgroundColor, status } = req.body;
 
         const note = await Note.findOne({
             _id: req.params.id,
@@ -158,6 +159,7 @@ router.put('/:id', async (req, res) => {
         if (tags !== undefined) note.tags = tags;
         if (priority) note.priority = priority;
         if (backgroundColor) note.backgroundColor = backgroundColor;
+        if (status) note.status = status;
 
         await note.save();
 
@@ -334,6 +336,25 @@ router.put('/:id/restore', async (req, res) => {
         });
     } catch (error) {
         console.error('Restore note error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
+    }
+});
+
+// @route   DELETE /api/notes/trash/empty
+// @desc    Permanently delete all notes in trash
+// @access  Private
+router.delete('/trash/empty', async (req, res) => {
+    try {
+        await Note.deleteMany({ userId: req.userId, isDeleted: true });
+        res.json({
+            success: true,
+            message: 'Trash emptied successfully'
+        });
+    } catch (error) {
+        console.error('Empty trash error:', error);
         res.status(500).json({
             success: false,
             message: 'Server error'
