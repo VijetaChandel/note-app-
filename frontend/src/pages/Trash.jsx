@@ -1,138 +1,113 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useWorkspaceStats } from '../hooks/useWorkspaceStats';
 import api from '../utils/api';
 import { toast } from 'react-toastify';
-import Navbar from '../components/Navbar';
 import NoteCard from '../components/NoteCard';
+import Layout from '../components/Layout';
 
-const Trash = ({ darkMode, toggleDarkMode }) => {
+const Trash = () => {
+    const { user } = useAuth();
+    const { refreshStats } = useWorkspaceStats();
+
     const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const fetchDeletedNotes = async () => {
+    const fetchTrashNotes = useCallback(async () => {
         try {
-            const response = await api.get('/notes', { params: { deleted: 'true' } });
+            const response = await api.get('/notes/trash');
             if (response.data.success) {
                 setNotes(response.data.notes);
             }
         } catch (error) {
-            toast.error('Failed to fetch deleted notes');
+            toast.error('Failed to fetch trash');
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
-        fetchDeletedNotes();
-    }, []);
+        fetchTrashNotes();
+    }, [fetchTrashNotes]);
 
     const handleRestore = async (noteId) => {
         try {
             const response = await api.put(`/notes/${noteId}/restore`);
             if (response.data.success) {
-                toast.success('Note restored successfully');
-                fetchDeletedNotes();
+                toast.success('Note restored');
+                fetchTrashNotes();
+                refreshStats();
             }
         } catch (error) {
-            toast.error('Failed to restore note');
+            toast.error('Failed to restore');
         }
     };
 
     const handlePermanentDelete = async (noteId) => {
-        if (window.confirm('Permanently delete this note? This action cannot be undone!')) {
+        if (window.confirm('Erase this note forever? This cannot be undone.')) {
             try {
                 const response = await api.delete(`/notes/${noteId}/permanent`);
                 if (response.data.success) {
-                    toast.success('Note permanently deleted');
-                    fetchDeletedNotes();
+                    toast.success('Permanently deleted');
+                    fetchTrashNotes();
+                    refreshStats();
                 }
             } catch (error) {
-                toast.error('Failed to delete note');
-            }
-        }
-    };
-
-    const handleEmptyTrash = async () => {
-        if (window.confirm('Permanently delete all notes in trash? This action cannot be undone!')) {
-            try {
-                for (const note of notes) {
-                    await api.delete(`/notes/${note._id}/permanent`);
-                }
-                toast.success('Trash emptied successfully');
-                fetchDeletedNotes();
-            } catch (error) {
-                toast.error('Failed to empty trash');
+                toast.error('Failed to erase');
             }
         }
     };
 
     return (
-        <div className="trash-page">
-            <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+        <Layout notesCount={notes.length}>
+            <style>{`
+                .notes-grid-container { flex: 1; padding: 30px 40px; overflow-y: auto; }
+                @media (max-width: 768px) { .notes-grid-container { padding: 15px; } }
 
-            <div className="page-container">
-                <div className="page-header">
-                    <div>
-                        <h1>🗑️ Trash</h1>
-                        <p className="page-subtitle">
-                            {notes.length} {notes.length === 1 ? 'note' : 'notes'} in trash
-                        </p>
-                    </div>
-                    {notes.length > 0 && (
-                        <button onClick={handleEmptyTrash} className="btn btn-danger">
-                            Empty Trash
-                        </button>
-                    )}
-                </div>
+                .notes-grid {
+                    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; padding-bottom: 40px;
+                }
+                @media (max-width: 768px) {
+                    .notes-grid { grid-template-columns: 1fr; gap: 20px; }
+                }
 
+                .empty-state {
+                    font-family: 'Caveat', cursive; font-size: 2.5rem; color: #78716c; opacity: 0.6;
+                    text-align: center; margin-top: 100px; grid-column: 1 / -1;
+                }
+
+                .kanban-card {
+                    background: #fffdf7; border-radius: 4px; padding: 24px 20px; position: relative;
+                    border: 1px solid rgba(28, 20, 16, 0.1); box-shadow: 3px 3px 0px #ef4444;
+                    transition: transform 0.2s ease; cursor: pointer;
+                }
+                .card-tape { position: absolute; top: -10px; left: 50%; transform: translateX(-50%) rotate(-1.5deg); width: 70px; height: 20px; background: rgba(239, 68, 68, 0.2); z-index: 2; }
+                .card-title { font-family: 'Lora', serif; font-size: 1.15rem; color: #292524; margin: 0 0 10px 0; }
+                .card-content { font-family: 'Inter', sans-serif; font-size: 0.875rem; color: #57534e; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+            `}</style>
+
+            <div className="notes-grid-container">
+                <h1 style={{ fontFamily: 'Caveat', fontSize: '2.5rem', textAlign: 'center', marginBottom: '30px', color: '#ef4444' }}>System Trash Bin</h1>
                 {loading ? (
-                    <div className="loading">
-                        <div className="spinner"></div>
-                    </div>
-                ) : notes.length > 0 ? (
-                    <div className="notes-grid">
-                        {notes.map(note => (
-                            <div key={note._id} className="trash-note-card">
-                                <div
-                                    className="note-card"
-                                    style={{ backgroundColor: note.backgroundColor }}
-                                >
-                                    <h3 className="note-title">{note.title}</h3>
-                                    <p className="note-content">{note.content}</p>
-
-                                    {note.tags && note.tags.length > 0 && (
-                                        <div className="note-tags">
-                                            {note.tags.map((tag, index) => (
-                                                <span key={index} className="tag">#{tag}</span>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    <div className="trash-actions">
-                                        <button
-                                            onClick={() => handleRestore(note._id)}
-                                            className="btn btn-primary"
-                                        >
-                                            ↩️ Restore
-                                        </button>
-                                        <button
-                                            onClick={() => handlePermanentDelete(note._id)}
-                                            className="btn btn-danger"
-                                        >
-                                            🗑️ Delete Forever
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    <div style={{ padding: '40px', fontFamily: 'Caveat', fontSize: '2rem' }}>Sifting through trash...</div>
                 ) : (
-                    <div className="empty-state">
-                        <h3>Trash is empty</h3>
-                        <p>Deleted notes will appear here</p>
+                    <div className="notes-grid">
+                        {notes.length === 0 ? (
+                            <div className="empty-state">Trash is empty...</div>
+                        ) : (
+                            notes.map(note => (
+                                <NoteCard
+                                    key={note._id}
+                                    note={note}
+                                    onDelete={handlePermanentDelete}
+                                    onRestore={handleRestore}
+                                />
+                            ))
+                        )}
                     </div>
                 )}
             </div>
-        </div>
+        </Layout>
     );
 };
 
