@@ -19,6 +19,7 @@ const Dashboard = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState('Board');
     const [syncingNoteId, setSyncingNoteId] = useState(null);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const fetchNotes = useCallback(async () => {
         try {
@@ -211,6 +212,12 @@ const Dashboard = () => {
                     pointer-events: none;
                 }
 
+                @media (max-width: 768px) {
+                    .nkp-layout::before {
+                        left: 58px; /* Adjusted for hidden sidebar */
+                    }
+                }
+
                 /* Sidebar */
                 .nkp-sidebar {
                     width: 200px;
@@ -219,9 +226,23 @@ const Dashboard = () => {
                     display: flex;
                     flex-direction: column;
                     padding: 24px 20px;
-                    z-index: 10;
+                    z-index: 1000;
                     box-shadow: 4px 0 20px rgba(0,0,0,0.15);
                     border-right: 1px solid #3d2b22;
+                    transition: transform 0.3s ease;
+                }
+
+                @media (max-width: 768px) {
+                    .nkp-sidebar {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        bottom: 0;
+                        transform: translateX(-100%);
+                    }
+                    .nkp-sidebar.open {
+                        transform: translateX(0);
+                    }
                 }
 
                 .nkp-brand {
@@ -287,8 +308,49 @@ const Dashboard = () => {
                     z-index: 20;
                 }
 
+                @media (max-width: 768px) {
+                    .nkp-topnav {
+                        padding: 0 15px;
+                        height: 70px;
+                    }
+                }
+
+                .hamburger-btn {
+                    display: none;
+                    background: none;
+                    border: none;
+                    color: #d97706;
+                    font-size: 1.5rem;
+                    cursor: pointer;
+                    z-index: 30;
+                }
+
+                @media (max-width: 768px) {
+                    .hamburger-btn {
+                        display: block;
+                    }
+                }
+
+                .mobile-overlay {
+                    display: none;
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0,0,0,0.5);
+                    z-index: 999;
+                }
+
+                @media (max-width: 768px) {
+                    .mobile-overlay.visible {
+                        display: block;
+                    }
+                }
+
                 .top-tabs {
                     display: flex; gap: 24px;
+                }
+
+                @media (max-width: 768px) {
+                    .top-tabs { display: none; }
                 }
 
                 .top-tab {
@@ -313,6 +375,11 @@ const Dashboard = () => {
                 }
                 .search-bar-expand:focus { width: 300px; outline: none; background: rgba(255, 255, 255, 0.1); border-color: #d97706; }
 
+                @media (max-width: 768px) {
+                    .search-bar-expand { width: 120px; font-size: 0.8rem; }
+                    .search-bar-expand:focus { width: 140px; }
+                }
+
                 .btn-new-note {
                     background: #d97706; color: #1c1410;
                     border: none; padding: 10px 20px; border-radius: 8px;
@@ -328,6 +395,10 @@ const Dashboard = () => {
                 /* Kanban Board */
                 .kanban-board-container {
                     flex: 1; overflow-x: auto; overflow-y: hidden; padding: 30px 40px;
+                }
+
+                @media (max-width: 768px) {
+                    .kanban-board-container { padding: 20px 15px; }
                 }
 
                 .kanban-board {
@@ -451,8 +522,14 @@ const Dashboard = () => {
                 }
             `}</style>
 
+            {/* Mobile Overlay */}
+            <div 
+                className={`mobile-overlay ${isSidebarOpen ? 'visible' : ''}`} 
+                onClick={() => setIsSidebarOpen(false)}
+            ></div>
+
             {/* Sidebar */}
-            <div className="nkp-sidebar">
+            <div className={`nkp-sidebar ${isSidebarOpen ? 'open' : ''}`}>
                 <div className="nkp-brand">NoteKeeper</div>
                 
                 <div className="nav-menu">
@@ -492,6 +569,7 @@ const Dashboard = () => {
                 
                 {/* Top Nav */}
                 <div className="nkp-topnav">
+                    <button className="hamburger-btn" onClick={() => setIsSidebarOpen(true)}>☰</button>
                     <div className="top-tabs">
                         <div className={`top-tab ${activeTab === 'Board' ? 'active' : ''}`} onClick={() => setActiveTab('Board')}>Board</div>
                         <div className={`top-tab ${activeTab === 'List' ? 'active' : ''}`} onClick={() => setActiveTab('List')}>List</div>
