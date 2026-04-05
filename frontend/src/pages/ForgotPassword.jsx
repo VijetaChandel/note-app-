@@ -54,13 +54,9 @@ const ForgotPassword = () => {
                     padding: 40px 20px;
                 }
 
-                .notepad-viewport::before {
-                    content: '';
-                    position: absolute;
-                    left: 64px; top: 0; bottom: 0;
-                    width: 2px; background-color: rgba(239, 68, 68, 0.3);
                     z-index: 0;
                 }
+                @media (max-width: 600px) { .notepad-viewport::before { left: 40px; } }
 
                 .notebook-card {
                     background: #fffdf7;
@@ -70,9 +66,12 @@ const ForgotPassword = () => {
                     padding: 48px 36px 36px;
                     position: relative;
                     z-index: 10;
-                    width: 100%;
                     max-width: 440px;
                     transition: transform 0.3s ease;
+                }
+                @media (max-width: 600px) {
+                    .notebook-card { padding: 40px 20px 30px 45px; width: 95%; max-width: 100%; box-shadow: 10px 10px 0px rgba(28, 20, 16, 0.08); }
+                    .headline { font-size: 1.6rem; }
                 }
 
                 .notebook-card:hover { transform: translateY(-4px); }

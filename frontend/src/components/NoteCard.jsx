@@ -3,7 +3,7 @@ import { HiSparkles } from 'react-icons/hi'; // Sparkle icon
 import api from '../utils/api';
 
 
-const NoteCard = ({ note, onUpdate, onDelete, onPin, onArchive, draggable, onDragStart, onDragEnd, isSyncing }) => {
+const NoteCard = ({ note, onUpdate, onDelete, onPin, onArchive, onRestore, draggable, onDragStart, onDragEnd, isSyncing }) => {
     // AI feature state
     const [showAIDropdown, setShowAIDropdown] = useState(false);
     const [aiLoading, setAiLoading] = useState(false);
@@ -85,7 +85,7 @@ const NoteCard = ({ note, onUpdate, onDelete, onPin, onArchive, draggable, onDra
             
             <div className="card-tape"></div>
             
-            {onPin && (
+            {!note.isDeleted && onPin && (
                 <button 
                     onClick={(e) => { e.stopPropagation(); onPin(note._id); }} 
                     title={note.isPinned ? "Unpin Note" : "Pin Note"}
@@ -127,34 +127,46 @@ const NoteCard = ({ note, onUpdate, onDelete, onPin, onArchive, draggable, onDra
                 </div>
                 
                 <div className="footer-actions">
-                    {!note.isArchived && currentStatusIndex > 0 && <button onClick={handlePrevStatus} title="Move Left" className="action-icon-always move-btn">←</button>}
-                    {!note.isArchived && currentStatusIndex < statuses.length - 1 && <button onClick={handleNextStatus} title="Move Right" className="action-icon-always move-btn">→</button>}
-                    <button onClick={() => onUpdate(note, note._id, false)} title="Edit Note" className="action-icon-always">✏️</button>
-                    {onArchive && (
+                    {!note.isDeleted && !note.isArchived && currentStatusIndex > 0 && <button onClick={handlePrevStatus} title="Move Left" className="action-icon-always move-btn">←</button>}
+                    {!note.isDeleted && !note.isArchived && currentStatusIndex < statuses.length - 1 && <button onClick={handleNextStatus} title="Move Right" className="action-icon-always move-btn">→</button>}
+                    {!note.isDeleted && <button onClick={() => onUpdate(note, note._id, false)} title="Edit Note" className="action-icon-always">✏️</button>}
+                    
+                    {onRestore && note.isDeleted && (
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); onRestore(note._id); }} 
+                            title="Restore Note"
+                            className="action-icon-always"
+                        >↺</button>
+                    )}
+
+                    {!note.isDeleted && onArchive && (
                         <button 
                             onClick={handleArchiveClick} 
                             title={note.isArchived ? "Unarchive Note" : "Archive Note"}
                             className="action-icon-always"
                         >{note.isArchived ? "📤" : "📥"}</button>
                     )}
-                    <button onClick={handleDeleteClick} title="Delete Note" className="action-icon-always delete-icon">🗑️</button>
-                    {/* Magic AI Button */}
-                    <div className="relative inline-block">
-                        <button
-                            onClick={() => setShowAIDropdown(!showAIDropdown)}
-                            title="Magic AI"
-                            className="action-icon-always"
-                        >
-                            <HiSparkles />
-                        </button>
-                        {showAIDropdown && (
-                            <ul className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded shadow-lg z-10">
-                                <li className="px-3 py-2 hover:bg-gray-100 cursor-pointer" onClick={() => handleAI('summarize')}>Summarize</li>
-                                <li className="px-3 py-2 hover:bg-gray-100 cursor-pointer" onClick={() => handleAI('improve')}>Improve Grammar</li>
-                                <li className="px-3 py-2 hover:bg-gray-100 cursor-pointer" onClick={() => handleAI('tags')}>Generate Tags</li>
-                            </ul>
-                        )}
-                    </div>
+                    <button onClick={handleDeleteClick} title={note.isDeleted ? "Delete Permanently" : "Delete Note"} className="action-icon-always delete-icon">🗑️</button>
+                    
+                    {/* Magic AI Button - Hide in Trash */}
+                    {!note.isDeleted && (
+                        <div className="relative inline-block">
+                            <button
+                                onClick={() => setShowAIDropdown(!showAIDropdown)}
+                                title="Magic AI"
+                                className="action-icon-always"
+                            >
+                                <HiSparkles />
+                            </button>
+                            {showAIDropdown && (
+                                <ul className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded shadow-lg z-10">
+                                    <li className="px-3 py-2 hover:bg-gray-100 cursor-pointer" onClick={() => handleAI('summarize')}>Summarize</li>
+                                    <li className="px-3 py-2 hover:bg-gray-100 cursor-pointer" onClick={() => handleAI('improve')}>Improve Grammar</li>
+                                    <li className="px-3 py-2 hover:bg-gray-100 cursor-pointer" onClick={() => handleAI('tags')}>Generate Tags</li>
+                                </ul>
+                            )}
+                        </div>
+                    )}
                 </div>
                 {/* AI response sticky note */}
                 {aiLoading && (

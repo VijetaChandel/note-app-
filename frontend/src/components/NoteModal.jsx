@@ -82,9 +82,10 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
                     background: rgba(0, 0, 0, 0.5);
                     backdrop-filter: blur(4px);
                     display: flex; justify-content: center; align-items: center;
-                    z-index: 1000; padding: 24px;
+                    z-index: 2000; padding: 20px;
                     animation: nbModalFadeIn 0.3s ease;
                 }
+                @media (max-width: 600px) { .nb-modal-overlay { padding: 10px; } }
                 @keyframes nbModalFadeIn { from { opacity: 0; } to { opacity: 1; } }
 
                 /* ===== NOTEBOOK PAPER MODAL ===== */
@@ -106,6 +107,9 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
                     font-family: 'Inter', sans-serif;
                     animation: nbModalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
                 }
+                @media (max-width: 600px) {
+                    .nb-modal-card { width: 95%; max-width: 100%; box-shadow: 2px 2px 0px #e5dcc8, 0 15px 30px rgba(0,0,0,0.2); }
+                }
                 @keyframes nbModalSlideUp {
                     from { transform: translateY(25px) rotate(-0.5deg); opacity: 0; }
                     to { transform: translateY(0) rotate(0); opacity: 1; }
@@ -121,6 +125,7 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
                     z-index: 1;
                     pointer-events: none;
                 }
+                @media (max-width: 600px) { .nb-modal-card::before { left: 40px; } }
 
                 /* Card Tape */
                 .nb-modal-tape {
@@ -139,6 +144,7 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
                     padding: 26px 30px 16px 65px;
                     border-bottom: 2px dashed rgba(28, 20, 16, 0.1);
                 }
+                @media (max-width: 600px) { .nb-modal-header { padding: 20px 15px 12px 50px; } }
                 .nb-modal-header h2 {
                     margin: 0;
                     font-family: 'Lora', serif;
@@ -160,10 +166,10 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
 
                 /* Body */
                 .nb-modal-body {
-                    padding: 20px 30px 20px 65px;
                     display: flex; flex-direction: column; gap: 20px;
                     flex: 1;
                 }
+                @media (max-width: 600px) { .nb-modal-body { padding: 15px 15px 15px 50px; gap: 15px; } }
 
                 .nb-mod-group { position: relative; }
                 .nb-mod-label {
@@ -205,6 +211,7 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
                 .nb-mod-row {
                     display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
                 }
+                @media (max-width: 600px) { .nb-mod-row { grid-template-columns: 1fr; gap: 15px; } }
 
                 /* Priority Select */
                 .nb-mod-select {
@@ -317,11 +324,11 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
 
                 /* Footer */
                 .nb-modal-footer {
-                    padding: 14px 30px 14px 65px;
                     border-top: 2px dashed rgba(28, 20, 16, 0.1);
                     display: flex; justify-content: space-between; align-items: center;
                     background: rgba(245, 240, 232, 0.5);
                 }
+                @media (max-width: 600px) { .nb-modal-footer { padding: 12px 15px 12px 50px; } }
 
                 .nb-btn-cancel {
                     background: transparent; border: none;

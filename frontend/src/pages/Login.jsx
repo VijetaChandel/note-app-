@@ -81,6 +81,7 @@ const Login = () => {
                     background-color: rgba(239, 68, 68, 0.4);
                     z-index: 0;
                 }
+                @media (max-width: 600px) { .notepad-layout::before { left: 40px; } }
 
                 /* Floating Sticky Chips */
                 .sticky-chip {
@@ -97,6 +98,7 @@ const Login = () => {
                 .chip-tr { top: 20%; right: 12%; background: #bbf7d0; transform: rotate(5deg); }
                 .chip-bl { bottom: 20%; left: 12%; background: #fed7aa; transform: rotate(3deg); }
                 .chip-br { bottom: 15%; right: 15%; background: #e0e7ff; transform: rotate(-6deg); }
+                @media (max-width: 480px) { .sticky-chip { display: none; } }
 
                 /* Pencil Emoji */
                 .pencil-bg {
@@ -137,6 +139,9 @@ const Login = () => {
                     animation: dropIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
                     transform-origin: top center;
                 }
+                @media (max-width: 600px) {
+                    .notepad-card { padding: 40px 20px 30px 45px; width: 95%; max-width: 100%; box-shadow: 6px 6px 0px #1e3a5f, 0 15px 40px rgba(0,0,0,0.15); }
+                }
 
                 /* Yellow Tape Strip */
                 .tape-strip {
@@ -152,15 +157,9 @@ const Login = () => {
                 }
 
                 /* Red Margin Line inside Card */
-                .notepad-card::before {
-                    content: '';
-                    position: absolute;
-                    left: 52px;
-                    top: 0;
-                    bottom: 0;
-                    width: 2px;
                     background-color: rgba(239, 68, 68, 0.4);
                 }
+                @media (max-width: 600px) { .notepad-card::before { left: 35px; } }
 
                 @keyframes dropIn {
                     0% { opacity: 0; transform: translateY(-20px) rotate(-0.5deg); }

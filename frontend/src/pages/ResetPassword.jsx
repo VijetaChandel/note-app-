@@ -78,6 +78,7 @@ const ResetPassword = () => {
                     padding: 24px;
                     position: relative;
                 }
+                @media (max-width: 600px) { .notepad-layout::after { content: ''; position: absolute; left: 40px; top: 0; bottom: 0; width: 2px; background: rgba(239, 68, 68, 0.2); } }
 
                 .notepad-card {
                     width: min(500px, 100%);
@@ -95,6 +96,10 @@ const ResetPassword = () => {
                         #f3ede2 33px,
                         #f3ede2 34px
                     );
+                }
+                @media (max-width: 600px) {
+                    .notepad-card { padding: 40px 15px 30px 45px; width: 95%; box-shadow: 4px 4px 0 rgba(24, 48, 75, 0.1); }
+                    .headline { font-size: 1.6rem; }
                 }
 
                 .tape-strip {

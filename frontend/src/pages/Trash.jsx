@@ -15,7 +15,7 @@ const Trash = () => {
 
     const fetchTrashNotes = useCallback(async () => {
         try {
-            const response = await api.get('/notes/trash');
+            const response = await api.get('/notes', { params: { deleted: 'true' } });
             if (response.data.success) {
                 setNotes(response.data.notes);
             }
