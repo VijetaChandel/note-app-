@@ -37,11 +37,12 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem('user', JSON.stringify(user));
                 setUser(user);
                 toast.success('Registration successful!');
-                return true;
+                return { success: true };
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Registration failed');
-            return false;
+            const message = error.response?.data?.message || 'Registration failed';
+            toast.error(message);
+            return { success: false, message };
         }
     };
 

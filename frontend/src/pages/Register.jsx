@@ -31,11 +31,11 @@ const Register = () => {
         e.preventDefault();
         if (!validateForm()) return;
         setLoading(true);
-        const success = await register(formData.name, formData.email, formData.password);
-        if (success) {
+        const result = await register(formData.name, formData.email, formData.password);
+        if (result.success) {
             navigate('/dashboard');
         } else {
-            setError('Registration failed. Please try again.');
+            setError(result.message || 'Registration failed. Please try again.');
             setLoading(false);
         }
     };
