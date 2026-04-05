@@ -398,11 +398,24 @@ const Dashboard = () => {
                 }
 
                 @media (max-width: 768px) {
-                    .kanban-board-container { padding: 20px 15px; }
+                    .kanban-board-container { 
+                        padding: 20px 15px; 
+                        overflow-x: hidden; 
+                        overflow-y: auto; 
+                    }
                 }
 
                 .kanban-board {
                     display: flex; gap: 24px; height: 100%; min-width: max-content;
+                }
+
+                @media (max-width: 768px) {
+                    .kanban-board {
+                        flex-direction: column;
+                        min-width: 100%;
+                        height: auto;
+                        gap: 40px;
+                    }
                 }
 
                 .k-column {
@@ -411,6 +424,15 @@ const Dashboard = () => {
                     border: 2px solid transparent; padding: 10px; margin: -10px;
                 }
                 
+                @media (max-width: 768px) {
+                    .k-column {
+                        width: 100%;
+                        height: auto;
+                        margin: 0;
+                        padding: 0;
+                    }
+                }
+
                 .k-column.drag-over-active {
                     background: rgba(217, 119, 6, 0.05); border-color: rgba(217, 119, 6, 0.5); border-style: dashed;
                 }
@@ -434,6 +456,13 @@ const Dashboard = () => {
                 .k-cards-scroll {
                     flex: 1; overflow-y: auto; padding-right: 10px; padding-bottom: 40px;
                     display: flex; flex-direction: column; gap: 20px;
+                }
+
+                @media (max-width: 768px) {
+                    .k-cards-scroll {
+                        overflow-y: visible; /* Let the container handle scroll */
+                        padding-right: 0;
+                    }
                 }
 
                 /* Custom scrollbar for cards */
