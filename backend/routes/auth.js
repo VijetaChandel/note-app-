@@ -50,28 +50,35 @@ const sendResetEmail = async (email, resetUrl) => {
 // @access  Public
 router.post('/register', async (req, res) => {
     try {
+        // Validation check for mandatory Env Vars to prevent 500 crashes
+        if (!process.env.JWT_SECRET) {
+            console.error('CRITICAL ERROR: JWT_SECRET environment variable is missing.');
+            return res.status(500).json({
+                success: false,
+                message: 'Configuration error: JWT_SECRET is missing. Please check your (.env) or Render dashboard.'
+            });
+        }
+
         let { name, email, password } = req.body;
 
         // Trim and lowercase email
         email = email?.trim().toLowerCase();
         name = name?.trim();
 
-        // Validate input
+        // Validate basic input
         if (!name || !email || !password) {
-            console.log('Registration failed: Missing fields', { name: !!name, email: !!email, password: !!password });
             return res.status(400).json({
                 success: false,
-                message: 'Please provide all required fields'
+                message: 'All fields (Name, Email, Password) are required.'
             });
         }
 
-        // Check if user already exists
+        // Check if user already exists (Manual check)
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            console.log('Registration failed: User already exists', { email });
             return res.status(400).json({
                 success: false,
-                message: 'User already exists with this email'
+                message: 'An account with this email already exists.'
             });
         }
 
@@ -79,7 +86,7 @@ router.post('/register', async (req, res) => {
         const user = new User({ name, email, password });
         await user.save();
 
-        // Create JWT token
+        // Create JWT token — already checked for JWT_SECRET at start of route
         const token = jwt.sign(
             { userId: user._id },
             process.env.JWT_SECRET,
@@ -88,7 +95,7 @@ router.post('/register', async (req, res) => {
 
         res.status(201).json({
             success: true,
-            message: 'User registered successfully',
+            message: 'Registration successful! You are now logged in.',
             token,
             user: {
                 id: user._id,
@@ -99,10 +106,18 @@ router.post('/register', async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Register error full stack:', error);
+        // Specifically handle MongoDB Duplicate Key error (just in case the manual findOne missed a race condition)
+        if (error.code === 11000) {
+            return res.status(400).json({
+                success: false,
+                message: 'This email is already registered.'
+            });
+        }
+
+        console.error('SERVER SIDE REGISTER ERROR:', error);
         res.status(500).json({
             success: false,
-            message: 'Server error during registration'
+            message: 'Database/Server error during registration. Please try again later.'
         });
     }
 });
