@@ -94,12 +94,25 @@ const Layout = ({ children, notesCount, completedCount, activeTab, onTabChange, 
                     background: rgba(28, 20, 16, 0.85); /* #1c1410 glass */
                     backdrop-filter: blur(12px);
                     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-                    display: flex; align-items: center; justify-content: space-between;
-                    padding: 0 40px; z-index: 100;
+                    display: grid;
+                    grid-template-columns: 1fr auto 1fr;
+                    align-items: center;
+                    padding: 0 40px;
+                    z-index: 100;
                 }
 
                 @media (max-width: 768px) {
-                    .nkp-topnav { padding: 0 15px; height: 70px; }
+                    .nkp-topnav { padding: 0 15px; height: 70px; display: flex; justify-content: space-between; gap: 10px; }
+                }
+
+                .top-left-group { display: flex; align-items: center; gap: 24px; }
+                .top-center-actions { display: flex; align-items: center; gap: 15px; justify-self: center; }
+                .top-right-actions { display: flex; align-items: center; justify-self: end; gap: 20px; }
+
+                @media (max-width: 768px) { 
+                    .top-left-group { flex: none; }
+                    .top-center-actions { flex: 1; justify-content: center; }
+                    .top-right-actions { flex: none; }
                 }
 
                 .hamburger-btn {
@@ -122,22 +135,22 @@ const Layout = ({ children, notesCount, completedCount, activeTab, onTabChange, 
                 .top-tab.active { color: #f5f0e8; font-style: italic; }
                 .top-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: #d97706; }
 
-                .top-actions { display: flex; align-items: center; gap: 20px; }
-                @media (max-width: 768px) { .top-actions { gap: 10px; } }
-
                 .search-bar-expand {
-                    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
-                    border-radius: 20px; padding: 8px 16px; color: #fff; width: 180px;
-                    transition: width 0.3s ease, background 0.3s ease;
+                    background: rgba(255, 255, 255, 0.1); 
+                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    border-radius: 20px; padding: 8px 20px; color: #fff; width: 280px;
+                    transition: all 0.3s ease;
+                    font-family: 'Inter', sans-serif;
                 }
-                .search-bar-expand:focus { width: 260px; outline: none; background: rgba(255, 255, 255, 0.1); border-color: #d97706; }
+                .search-bar-expand:focus { width: 320px; outline: none; background: rgba(255, 255, 255, 0.15); border-color: #d97706; box-shadow: 0 0 10px rgba(217, 119, 6, 0.2); }
 
                 @media (max-width: 768px) {
-                    .search-bar-expand { width: 110px; font-size: 0.8rem; }
-                    .search-bar-expand:focus { width: 130px; }
+                    .search-bar-expand { width: 140px; font-size: 0.8rem; padding: 6px 12px; }
+                    .search-bar-expand:focus { width: 160px; }
                 }
 
-                .profile-dropdown { color: white; cursor: pointer; font-size: 1.2rem; }
+                .profile-dropdown { color: white; cursor: pointer; font-size: 1.2rem; transition: transform 0.2s ease; }
+                .profile-dropdown:hover { transform: scale(1.1); }
             `}</style>
 
             {/* Mobile Overlay */}
@@ -157,27 +170,29 @@ const Layout = ({ children, notesCount, completedCount, activeTab, onTabChange, 
             {/* Layout Content */}
             <div className="nkp-main">
                 <div className="nkp-topnav">
-                    <button className="hamburger-btn" onClick={() => setIsSidebarOpen(true)}>☰</button>
-                    
-                    {/* Page Tabs */}
-                    <div className="top-tabs">
-                        {onTabChange ? (
-                            ['Board', 'List', 'Calendar'].map(tab => (
-                                <div 
-                                    key={tab}
-                                    className={`top-tab ${activeTab === tab ? 'active' : ''}`} 
-                                    onClick={() => onTabChange(tab)}
-                                >
-                                    {tab}
-                                </div>
-                            ))
-                        ) : (
-                           <div className="top-tab active">Control Center</div>
-                        )}
+                    <div className="top-left-group">
+                        <button className="hamburger-btn" onClick={() => setIsSidebarOpen(true)}>☰</button>
+                        
+                        {/* Page Tabs */}
+                        <div className="top-tabs">
+                            {onTabChange ? (
+                                ['Board', 'List', 'Calendar'].map(tab => (
+                                    <div 
+                                        key={tab}
+                                        className={`top-tab ${activeTab === tab ? 'active' : ''}`} 
+                                        onClick={() => onTabChange(tab)}
+                                    >
+                                        {tab}
+                                    </div>
+                                ))
+                            ) : (
+                               <div className="top-tab active">Control Center</div>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Navbar Actions */}
-                    <div className="top-actions">
+                    {/* Centered Actions */}
+                    <div className="top-center-actions">
                         {showSearch && (
                             <input 
                                 type="text" 
@@ -188,6 +203,10 @@ const Layout = ({ children, notesCount, completedCount, activeTab, onTabChange, 
                             />
                         )}
                         {actionButton}
+                    </div>
+
+                    {/* Right Profile Actions */}
+                    <div className="top-right-actions">
                         <div className="profile-dropdown" title={user?.name}>👤</div>
                     </div>
                 </div>

@@ -95,12 +95,12 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
                         to bottom, transparent, transparent 31px, #f1ece1 31px, #f1ece1 32px
                     );
                     border-radius: 6px;
-                    border: 1.5px solid #1e3a5f;
+                    border: 2px solid #d97706; /* Dark Orange Border */
                     box-shadow:
-                        3px 3px 0px #e5dcc8,
-                        6px 6px 0px #d4c9b0,
-                        0 25px 50px rgba(0,0,0,0.25);
-                    width: 100%; max-width: 680px;
+                        4px 4px 0px #d97706,
+                        8px 8px 0px rgba(217, 119, 6, 0.15),
+                        0 30px 60px rgba(0,0,0,0.3);
+                    width: 100%; max-width: 520px; /* Reduced from 680px */
                     position: relative;
                     display: flex; flex-direction: column;
                     overflow: visible;
@@ -141,7 +141,7 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
                 /* Header */
                 .nb-modal-header {
                     display: flex; justify-content: space-between; align-items: center;
-                    padding: 26px 30px 16px 65px;
+                    padding: 16px 30px 10px 75px; /* Reduced vertical padding */
                     border-bottom: 2px dashed rgba(28, 20, 16, 0.1);
                 }
                 @media (max-width: 600px) { .nb-modal-header { padding: 20px 15px 12px 50px; } }
@@ -166,8 +166,9 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
 
                 /* Body */
                 .nb-modal-body {
-                    display: flex; flex-direction: column; gap: 20px;
+                    display: flex; flex-direction: column; gap: 14px; /* Reduced gap further */
                     flex: 1;
+                    padding: 10px 30px 15px 75px; /* Trimmed vertical padding */
                 }
                 @media (max-width: 600px) { .nb-modal-body { padding: 15px 15px 15px 50px; gap: 15px; } }
 
@@ -204,8 +205,8 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
                 }
 
                 .nb-mod-textarea {
-                    resize: vertical; min-height: 120px;
-                    line-height: 31px;
+                    resize: vertical; min-height: 100px; /* Reduced from 120px */
+                    line-height: 28px; /* Adjusted for tighter feel */
                 }
 
                 .nb-mod-row {
@@ -327,6 +328,7 @@ const NoteModal = ({ isOpen, onClose, onSave, note }) => {
                     border-top: 2px dashed rgba(28, 20, 16, 0.1);
                     display: flex; justify-content: space-between; align-items: center;
                     background: rgba(245, 240, 232, 0.5);
+                    padding: 10px 30px 12px 75px; /* Trimmed padding */
                 }
                 @media (max-width: 600px) { .nb-modal-footer { padding: 12px 15px 12px 50px; } }
 

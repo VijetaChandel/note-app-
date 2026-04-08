@@ -31,9 +31,13 @@ const Register = () => {
         e.preventDefault();
         if (!validateForm()) return;
         setLoading(true);
+        setError('');
+        
+        // Use a faster transition if the response is quick
         const result = await register(formData.name, formData.email, formData.password);
         if (result.success) {
-            navigate('/dashboard');
+            // Speed up the transition to dashboard
+            setTimeout(() => navigate('/dashboard'), 100);
         } else {
             setError(result.message || 'Registration failed. Please try again.');
             setLoading(false);
